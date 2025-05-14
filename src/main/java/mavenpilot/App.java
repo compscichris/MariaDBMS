@@ -1,10 +1,26 @@
 package mavenpilot;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+
 import javafx.application.Application;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.Screen;
+
+import javafx.scene.control.Button;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.geometry.Rectangle2D;
+
+import javax.swing.*;
 
 /**
  * Hello world!
@@ -18,15 +34,60 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         // Create a label and set text
-        Label label = new Label("Hello, JavaFX!");
+        Label label = new Label("ENTER DATABASE URL:");
+        label.setFont(new Font("Courier New", 20));
+        label.setBackground(Background.fill(Color.RED));
+        Point mousePoint = MouseInfo.getPointerInfo().getLocation();
+        Screen targetScreen = Screen.getScreens().stream()
+                .filter(screen -> screen.getBounds().contains(mousePoint.x, mousePoint.y))
+                .findFirst()
+                .orElse(Screen.getPrimary());
+        // Get bounds of that screen
+        Rectangle2D bounds = targetScreen.getVisualBounds();
+        //MAIN LAYOUT OF WINDOW
+        Pane root = new Pane();
+        root.setBackground(Background.fill(Color.BLUE));
 
+        //CREATE A LOGIN MECHANISM
+        root.getChildren().add(label);
+        label.layoutXProperty().bind(root.widthProperty().multiply(.5).subtract(label.widthProperty().divide(2)));
+        label.setLayoutY(0.0);
+        //
+        //Text text = new Text("Enter the URL");
+        //text.layoutXProperty().bind(root.widthProperty().multiply(.5).subtract(label.widthProperty().divide(2)));
+        //text.layoutYProperty().bind(root.heightProperty().multiply(.1));
+        //root.getChildren().add(text);
+        //
+        TextArea textArea = new TextArea();
+        textArea.layoutXProperty().bind(root.widthProperty().multiply(.5).subtract(textArea.widthProperty().divide(2)));
+        textArea.layoutYProperty().bind(root.heightProperty().multiply(.5));
+        root.getChildren().add(textArea);
+        Button fileExplorer = new Button("Open File");
+        fileExplorer.setOnAction(event -> {
+            File folder = new File("C:\\Users");
+            if (folder.exists()) {
+                try {
+                    Desktop.getDesktop().open(folder);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        root.getChildren().add(fileExplorer);
+        Scene scene = new Scene(root, bounds.getWidth()/2, bounds.getHeight()/2);
+        /*
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int width = gd.getDisplayMode().getWidth();
+        int height = gd.getDisplayMode().getHeight();
         // Create a scene and set it on the stage
-        Scene scene = new Scene(label, 400, 200);  // 400x200 is the window size
+
+        //Scene scene = new Scene(label, width, height);  // 400x200 is the window size*/
+        //Scene scene = new Scene(label, width, height);
         stage.setScene(scene);
 
         // Set the window title
         stage.setTitle("JavaFX Hello World");
-
+        stage.setTitle("JavaFX Application");
         // Show the stage (window)
         stage.show();
     }
