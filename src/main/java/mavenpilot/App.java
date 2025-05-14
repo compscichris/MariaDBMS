@@ -22,6 +22,8 @@ import javafx.geometry.Rectangle2D;
 
 import javax.swing.*;
 
+//For file explorer desktop
+import javafx.stage.FileChooser;
 /**
  * Hello world!
  */
@@ -64,13 +66,22 @@ public class App extends Application {
         root.getChildren().add(textArea);
         Button fileExplorer = new Button("Open File");
         fileExplorer.setOnAction(event -> {
-            File folder = new File("C:\\Users");
-            if (folder.exists()) {
-                try {
-                    Desktop.getDesktop().open(folder);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select a File");
+
+            // Optional: Set initial directory or filters
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+            // fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+            // Show the file chooser and wait for user to select a file
+            File selectedFile = fileChooser.showOpenDialog(stage);
+
+            // Handle the selected file
+            if (selectedFile != null) {
+                System.out.println("User selected file: " + selectedFile.getAbsolutePath());
+                // You can now read/process the file
+            }
+            else {
+                System.out.println("File selection cancelled.");
             }
         });
         root.getChildren().add(fileExplorer);
