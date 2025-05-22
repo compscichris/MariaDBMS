@@ -1,16 +1,13 @@
-package mavenpilot;
+package View;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 
 import javafx.application.Application;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
 
@@ -19,8 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.geometry.Rectangle2D;
-
-import javax.swing.*;
 
 //For file explorer desktop
 import javafx.stage.FileChooser;
