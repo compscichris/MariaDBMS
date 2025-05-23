@@ -20,14 +20,14 @@ public class MariaResearchLogin
 	{
 
 	}
-	MariaResearchLogin(String url, int mode, char[] pass)
+	public MariaResearchLogin(String url, int mode, char[] pass)
 	{
 		this.mariaURL = url;
 		try {
 			Class.forName("org.mariadb.jdbc.Driver");
 			Console console = System.console();
 			//console mode
-			if(mode ==0)
+			if(mode == 0)
 			{
 				this.user = console.readLine("Enter username: ");
 				this.conDB = DriverManager.getConnection(mariaURL,user,new String(console.readPassword("Enter password: ")));
@@ -49,6 +49,29 @@ public class MariaResearchLogin
 	/*
 	 * selectOption is a method that handles the user interface from the console side
 	 */
+	public int injectSQL(String aggregate)
+	{
+		try {
+			System.out.println("Executing statement...");
+			Statement stmt = conDB.createStatement();
+			boolean works = stmt.execute(aggregate);
+			if(!works)
+			{
+				System.out.println("No syntax errors detected.");
+			}
+			stmt.close();
+			return 1;
+		}
+		catch (SQLException e)
+		{
+			System.err.println("*** SQLException:  "
+					+ "TABLE CREATION UNSUCCESSFUL.");
+			System.err.println("\tMessage:   " + e.getMessage());
+			System.err.println("\tSQLState:  " + e.getSQLState());
+			System.err.println("\tErrorCode: " + e.getErrorCode());
+			return 0;
+		}
+	}
 	public void selectOption()
 	{
 		Scanner input = new Scanner(System.in);
@@ -74,25 +97,7 @@ public class MariaResearchLogin
 					aggregate += user_in + "\n";
 					user_in = input.nextLine();
 				}
-				try {
-					System.out.println("Executing statement...");
-					Statement stmt = conDB.createStatement();
-					boolean works = stmt.execute(aggregate);
-					if(!works)
-					{
-						System.out.println("No syntax errors detected.");
-					}
-					stmt.close();
-				}
-				catch (SQLException e)
-				{
-					System.err.println("*** SQLException:  "
-							+ "TABLE CREATION UNSUCCESSFUL.");
-					System.err.println("\tMessage:   " + e.getMessage());
-					System.err.println("\tSQLState:  " + e.getSQLState());
-					System.err.println("\tErrorCode: " + e.getErrorCode());
-					System.exit(-1);
-				}
+				injectSQL(aggregate);
 			}
 
 			//OPTION B

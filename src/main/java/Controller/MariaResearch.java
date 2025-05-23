@@ -49,7 +49,8 @@ public class MariaResearch
         //console or application gui mode
         if(mode == 0)
         {
-            MariaDBConsole console = new MariaDBConsole();
+            MariaDBConsole console = new MariaDBConsole(mariaURL);
+            console.selectOption();
         }
         else if(mode == 1)
         {

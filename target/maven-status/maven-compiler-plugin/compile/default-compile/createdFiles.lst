@@ -1,3 +1,5 @@
+View\MariaDBConsole.class
+View\MariaDBApp.class
 Controller\MariaResearchLogin.class
+Controller\MariaLoginException.class
 Controller\MariaResearch.class
-mavenpilot\App.class
