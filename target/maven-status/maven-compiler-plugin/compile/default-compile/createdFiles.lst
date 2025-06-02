@@ -1,5 +1,6 @@
 View\MariaDBConsole.class
 View\MariaDBApp.class
 Controller\MariaResearchLogin.class
+module-info.class
 Controller\MariaLoginException.class
 Controller\MariaResearch.class

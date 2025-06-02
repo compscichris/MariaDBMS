@@ -20,11 +20,14 @@ import Controller.MariaResearchLogin;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.TextField;
+import javafx.scene.text.Font;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
+//import java.awt.Font;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
 
@@ -48,12 +51,12 @@ public class MariaDBApp extends Application {
      * @param stage
      * @throws Exception
      */
+    private MariaResearchLogin login;
     @Override
     public void start(Stage stage) throws Exception {
-        MariaResearchLogin login;// = new MariaResearch(dbUrl,1, passwordField.getText());
         Point mousePoint = MouseInfo.getPointerInfo().getLocation();
         Screen targetScreen = Screen.getScreens().stream()
-                .filter(screen -> screen.getBounds().contains(mousePoint.x, mousePoint.y))
+                .filter(screen  -> screen.getBounds().contains(mousePoint.x, mousePoint.y))
                 .findFirst()
                 .orElse(Screen.getPrimary());
         // Get bounds of that screen
@@ -61,41 +64,64 @@ public class MariaDBApp extends Application {
         //MAIN LAYOUT OF WINDOW
         Pane root = new Pane();
         root.setBackground(Background.fill(Color.BLUE));
+        root.setPrefSize(bounds.getWidth()/2, bounds.getHeight()/2);
 
         //URL SECTION
         //Label
+        AnchorPane section1 = new AnchorPane();
+        section1.prefWidthProperty().bind(root.widthProperty());
+        section1.prefHeightProperty().bind(root.heightProperty().multiply(.2));
+        section1.setBackground(Background.fill(Color.GREEN));
         Label urlLabel = new Label("ENTER DATABASE URL:");
-        urlLabel.setFont(new Font("Courier New", 20));
+        urlLabel.setFont(new Font("Courier New", 12));
         urlLabel.setBackground(Background.fill(Color.RED));
-        urlLabel.layoutXProperty().bind(root.widthProperty().multiply(.5).subtract(urlLabel.widthProperty().divide(2)));
-        urlLabel.setLayoutY(0.0);
-        root.getChildren().add(urlLabel);
+        AnchorPane.setLeftAnchor(urlLabel,20.0);
+        AnchorPane.setTopAnchor(urlLabel,20.0);
+        section1.getChildren().add(urlLabel);
+
         //TextArea
-        TextArea urlArea = new TextArea();
-        urlArea.setFont(new Font("Courier New", 12));
-        urlArea.resize(root.getWidth(), 1);
-        urlArea.setWrapText(true);
-        urlArea.setPrefRowCount(3);
-        urlArea.prefWidthProperty().bind(root.widthProperty().multiply(0.8));  // 80% width
-        urlArea.layoutXProperty().bind(root.widthProperty().multiply(.2).divide(2));
-        urlArea.setLayoutY(30.0);
-        root.getChildren().add(urlArea);
+        TextField urlField = new TextField();
+        urlField.setFont(new Font("Courier New", 12));
+        urlField.prefWidthProperty().bind(section1.widthProperty().multiply(0.5));  // 80% width
+        AnchorPane.setRightAnchor(urlField,20.0);
+        AnchorPane.setTopAnchor(urlField,20.0);
+        section1.getChildren().add(urlField);
+        //
+        TextField userField = new TextField();
+        userField.setFont(new Font("Courier New", 12));
+        userField.prefWidthProperty().bind(section1.widthProperty().multiply(0.15));  // 80% width
+        AnchorPane.setRightAnchor(userField,220.0);
+        AnchorPane.setTopAnchor(userField,60.0);
+        section1.getChildren().add(userField);
         //Server Access
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter your password");
         passwordField.setFont(new Font("Courier New", 12));
-        passwordField.setLayoutX(100);
-        passwordField.setLayoutY(200);
-        root.getChildren().add(passwordField);
+        passwordField.prefWidthProperty().bind(section1.widthProperty().multiply(0.15));
+        AnchorPane.setRightAnchor(passwordField, 20.0);
+        AnchorPane.setTopAnchor(passwordField, 60.0);
+        section1.getChildren().add(passwordField);
         Button submit = new Button("Select Server");
-        submit.setLayoutY(30);
+        AnchorPane.setLeftAnchor(submit, 20.0);
+        AnchorPane.setTopAnchor(submit, 60.0);
         submit.setOnAction(event -> {
-            String dbUrl = urlArea.getText();
-
-
+            System.out.println("📣 Submit button clicked");
+            String dbUrl = urlField.getText();
+            String user = userField.getText();
+            new Thread(() -> {
+                try {
+                    MariaResearchLogin session = new MariaResearchLogin(dbUrl, 1, user, passwordField.getText().toCharArray());
+                    login = session;
+                    System.out.println("Login successful");
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println(e.getMessage());
+                }
+            }).start();
         });
-        root.getChildren().add(submit);
-
+        section1.getChildren().add(submit);
+        root.getChildren().add(section1);
         //FILE EXPLORER SECTION
         //Set information
         TextArea fileArea = new TextArea();
@@ -149,4 +175,5 @@ public class MariaDBApp extends Application {
         // Show the stage (window)
         stage.show();
     }
+    //public static void createLoginDisplay
 }

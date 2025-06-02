@@ -11,8 +11,11 @@ public class MariaDBConsole {
      * selectOption is a method that handles the user interface from the console side
      */
     MariaResearchLogin session;
-    public MariaDBConsole(String mariaURL) {
-        this.session = new MariaResearchLogin(mariaURL, 0, new char[1]);
+    public MariaDBConsole() {
+        Scanner getURL = new Scanner(System.in);
+        String mariaURL = getURL.next();
+        this.session = new MariaResearchLogin(mariaURL, 0, "", new char[1]);
+        this.selectOption();
     }
     public void selectOption()
     {

@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 
 public class MariaResearch
 {
+    public static int instance = 0;
     public static final String tName[] = {"PCparts", "CPUspec", "MOBOspec", "GPUspec", "flight_staff"};
     /**
      * This main method handles all the code that is needed to create the connection to the oracle dbms.
@@ -25,22 +26,16 @@ public class MariaResearch
     public static void main (String [] args)
     {
         String mariaURL="";
-        int mode = 0;
+        int mode = -1;
         char password[];
         //default run configuration
         if(args.length == 0) {
-            mariaURL ="jdbc:mariadb://localhost:3306/MariaResearch";
+            mode = 0;
         }
         //single arg run configuration
         else if(args.length == 1)
         {
-            mariaURL = args[0];
-        }
-        //dual arg run configuration
-        else if(args.length == 2)
-        {
-            mariaURL = args[0];
-            mode = Integer.parseInt(args[1]);
+            mode = Integer.parseInt(args[0]);
         }
         else {
             System.out.println("\nIncorrect Format Detected\n Expected Format:  java MariaLogin <MariaDB URL> <mode (optional)> ");
@@ -49,8 +44,7 @@ public class MariaResearch
         //console or application gui mode
         if(mode == 0)
         {
-            MariaDBConsole console = new MariaDBConsole(mariaURL);
-            console.selectOption();
+            MariaDBConsole console = new MariaDBConsole();
         }
         else if(mode == 1)
         {

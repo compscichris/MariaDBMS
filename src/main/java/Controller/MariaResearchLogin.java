@@ -3,6 +3,8 @@
  * Date 5/7/2025
  */
 package Controller;
+import com.sun.jna.WString;
+
 import java.io.*;
 import java.sql.*;
 import java.util.Arrays;
@@ -13,31 +15,29 @@ import java.util.Scanner;
 public class MariaResearchLogin
 {
 	private Connection conDB = null;
-	private String user;
+	private String userName;
 	private String mariaURL;
 	//CONSTRUCTOR
-	MariaResearchLogin()
-	{
-
-	}
-	public MariaResearchLogin(String url, int mode, char[] pass)
+	public MariaResearchLogin(String url, int mode, String user, char[] pass)
 	{
 		this.mariaURL = url;
 		try {
 			Class.forName("org.mariadb.jdbc.Driver");
-			Console console = System.console();
 			//console mode
 			if(mode == 0)
 			{
-				this.user = console.readLine("Enter username: ");
-				this.conDB = DriverManager.getConnection(mariaURL,user,new String(console.readPassword("Enter password: ")));
+				Console console = System.console();
+				this.userName = console.readLine("Enter username: ");
+				this.conDB = DriverManager.getConnection(mariaURL,userName,new String(console.readPassword("Enter password: ")));
 			}
 			else if(mode == 1){
-				this.conDB = DriverManager.getConnection(mariaURL,user,new String(pass));
+				this.userName = user;
+				this.conDB = DriverManager.getConnection(mariaURL,userName,new String(pass));
 				Arrays.fill(pass, ' ');
 			}
 		}
 		catch (ClassNotFoundException e){
+			System.out.print("ClassNotFoundException: ");
 			System.out.println(e.getMessage());
 			System.exit(-1);
 		}
