@@ -72,55 +72,22 @@ public class MariaResearchLogin
 			return 0;
 		}
 	}
-	public void selectOption()
-	{
-		Scanner input = new Scanner(System.in);
-		String option = "";
-		//ACCESS MENU
-		while(option != "quit")
-		{
-			System.out.println("OPTIONS (Enter option '*' ");
-			System.out.println("Option A: INPUT SQL QUERY");//WILL BE THE MOST COMPLEX
-			System.out.println("Option B: INJECT SQL FILE");
-			System.out.println("Option C: RETRIEVE SQL TABLES");
-			System.out.println("EXIT: Enter 'quit'");
-			option = input.nextLine();
-
-			//OPTION A
-			if(option.equalsIgnoreCase("a"))
+	public String sqlParser(File file){
+		String res = "";
+		try{
+			Scanner scanner = new Scanner(file);
+			while(scanner.hasNext())
 			{
-				System.out.println("Enter SQL statement: ");
-				String user_in = input.nextLine();
-				String aggregate = "";
-				while(user_in.contains(";"))
-				{
-					aggregate += user_in + "\n";
-					user_in = input.nextLine();
-				}
-				injectSQL(aggregate);
+				res += scanner.nextLine();
 			}
-
-			//OPTION B
-			else if(option.equalsIgnoreCase("b"))
-			{
-				System.out.println("Enter SQL file: ");
-				String user_in = input.nextLine();
-			}
-			//OPTION C
-			else if(option.equalsIgnoreCase("c"))
-			{
-
-			}
-			//QUIT
-			else if(option.equalsIgnoreCase("quit"))
-			{
-				System.out.println("Logging out...");
-			}
-			else
-			{
-				System.out.println("ENTER A VALID OPTION.");
-			}
+			System.out.println(res);
 		}
+		catch (FileNotFoundException e){
+			System.out.println("File not found.");
+		}
+		return res;
+	}
+	public void close(){
 		try{
 			this.conDB.close();
 		}
@@ -129,5 +96,4 @@ public class MariaResearchLogin
 			System.exit(-1);
 		}
 	}
-
 }

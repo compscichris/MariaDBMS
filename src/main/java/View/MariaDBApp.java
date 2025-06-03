@@ -14,10 +14,12 @@ package View;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Scanner;
 
 
 import Controller.MariaResearchLogin;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
@@ -63,19 +65,7 @@ public class MariaDBApp extends Application {
                 .orElse(Screen.getPrimary());
         // Get bounds of that screen
         Rectangle2D bounds = targetScreen.getVisualBounds();
-        //MAIN LAYOUT OF WINDOW
-        /*Pane root = new Pane();
-        root.setBackground(Background.fill(Color.BLUE));
-        root.setPrefSize(bounds.getWidth()/2, bounds.getHeight()/2);
-*/
-        //URL SECTION
-        //Label
 
-        //root.getChildren().add(section1);
-        /*//FILE EXPLORER SECTION
-        //Set information
-
-        */
         //INTERACTION AREA
         loginScene = new Scene(createLoginDisplay(stage), 400, 200);
         mainScene = new Scene(createMainDisplay(stage,bounds.getWidth()/1.5, bounds.getHeight()/1.5), bounds.getWidth()/1.5, bounds.getHeight()/1.5);
@@ -126,6 +116,13 @@ public class MariaDBApp extends Application {
         output.setWrapText(true);
         GridPane.setConstraints(output, 1, 0);
         screenUI.getChildren().add(output);
+        //error debug
+        TextArea log = new TextArea();
+        log.setEditable(false);
+        log.setPrefWidth(width);
+        output.setPrefHeight(height*0.1);
+        output.setWrapText(true);
+        GridPane.setConstraints(log, 0, 2);
         //ADJUSTMENT
         AnchorPane.setTopAnchor(screenUI, 35.0);
         toolbar.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
@@ -157,6 +154,8 @@ public class MariaDBApp extends Application {
                 System.out.println("Selected file: " + selectedFile.getAbsolutePath());
                 fileField.setText(selectedFile.getAbsolutePath());
                 // You can now read/process the file
+                String res = login.sqlParser(selectedFile);
+                console.setText(res);
             }
             else {
                 System.out.println("File selection cancelled.");
@@ -168,16 +167,27 @@ public class MariaDBApp extends Application {
         //INJECT Button
         Button injectButton = new Button("Inject SQL File");
         injectButton.setOnAction(event -> {
-
+            if(console.getText().equals(""))
+            {
+                log.setText("No content in console.");
+            }
+            else{
+                login.injectSQL(console.getText());
+            }
         });
+        GridPane.setConstraints(injectButton, 2, 0);
+        toolbar.getChildren().add(injectButton);
         Button quitButton = new Button("Logout");
         quitButton.setOnAction(event -> {
             console.clear();
             fileField.setText("");
             output.clear();
+            login.close();
             login = null;
             stage.setScene(loginScene);
         });
+        GridPane.setConstraints(quitButton, 3, 0);
+        toolbar.getChildren().add(quitButton);
         mainDisplay.getChildren().add(toolbar);
         mainDisplay.getChildren().add(screenUI);
         mainDisplay.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
@@ -252,7 +262,7 @@ public class MariaDBApp extends Application {
             System.out.println("📣 Submit button clicked");
             String dbUrl = urlField.getText();
             String user = userField.getText();
-            new Thread(() -> {
+            Platform.runLater(() -> {
                 try {
                     MariaResearchLogin session = new MariaResearchLogin(dbUrl, 1, user, passwordField.getText().toCharArray());
                     login = session;
@@ -265,7 +275,7 @@ public class MariaDBApp extends Application {
                     e.printStackTrace();
                     System.out.println(e.getMessage());
                 }
-            }).start();
+            });
         });
         section1.getChildren().add(submit);
         return section1;

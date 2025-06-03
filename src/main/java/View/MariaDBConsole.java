@@ -58,6 +58,7 @@ public class MariaDBConsole {
             else if(option.equalsIgnoreCase("quit"))
             {
                 System.out.println("Logging out...");
+                session.close();
                 break;
             }
             else
