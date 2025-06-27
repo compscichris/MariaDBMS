@@ -1,22 +1,35 @@
 package View;
 
+import Controller.MariaLoginException;
 import Controller.MariaResearchLogin;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+/**
+ * MariaDBConsole is the console variant of the application that can run on machines without GUI, and
+ * can be used for testing and automation purposes.
+ *
+ */
 public class MariaDBConsole {
-    /*
-     * selectOption is a method that handles the user interface from the console side
-     */
-    MariaResearchLogin session;
+    private MariaResearchLogin session;
     public MariaDBConsole() {
+        System.out.println("\nMariaDB Console\nEnter Server IP Address: ");
         Scanner getURL = new Scanner(System.in);
         String mariaURL = getURL.next();
-        this.session = new MariaResearchLogin(mariaURL, 0, "", new char[1]);
+        try{
+            this.session = new MariaResearchLogin(mariaURL);
+        }
+        catch(MariaLoginException e) {
+            System.err.println(e.getMessage());
+            System.err.println(e.getCause());
+        }
         this.selectOption();
     }
+
+    /**
+     * selectOption() is
+     */
     public void selectOption()
     {
         Scanner input = new Scanner(System.in);
@@ -25,7 +38,7 @@ public class MariaDBConsole {
         while(option != "quit")
         {
             System.out.println("OPTIONS (Enter option '*' ");
-            System.out.println("Option A: INPUT SQL QUERY");//WILL BE THE MOST COMPLEX
+            System.out.println("Option A: INJECT SQL QUERY");//WILL BE THE MOST COMPLEX
             System.out.println("Option B: INJECT SQL FILE");
             System.out.println("Option C: RETRIEVE SQL TABLES");
             System.out.println("EXIT: Enter 'quit'");
@@ -41,7 +54,11 @@ public class MariaDBConsole {
                     aggregate += user_in + "\n";
                     user_in = input.nextLine();
                 }
-                session.injectSQL(aggregate);
+                try{
+                    session.injectSQL(aggregate);
+                } catch (MariaLoginException e) {
+                    System.err.println(e.getMessage());
+                }
             }
             //OPTION B
             else if(option.equalsIgnoreCase("b"))
