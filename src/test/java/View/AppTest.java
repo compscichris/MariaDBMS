@@ -1,11 +1,16 @@
-package maven-pilot;
+package View;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import Controller.MariaResearch;
+import Controller.MariaResearchLogin;
 import org.junit.jupiter.api.Test;
+import org.testfx.assertions.api.*;
+import org.testfx.framework.junit5.ApplicationTest;
 
 /**
- * Unit test for simple App.
+ * AppTest for MariaDBApp is a testing suite that focuses of testing the
+ *
  */
 public class AppTest {
 
@@ -15,5 +20,13 @@ public class AppTest {
     @Test
     public void shouldAnswerWithTrue() {
         assertTrue(true);
+    }
+
+    /**
+     * MariaDB
+     */
+    public void testApplication(){
+        //MariaResearch mariaResearch = new MariaResearch(1);
+        ApplicationTest app = new ApplicationTest(MariaDBApp.class);
     }
 }

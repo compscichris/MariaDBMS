@@ -14,8 +14,9 @@ package View;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
-
 
 import Controller.MariaResearchLogin;
 import javafx.application.Application;
@@ -28,7 +29,6 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.control.TextArea;
-//import java.awt.Font;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
 
@@ -43,14 +43,12 @@ import javafx.scene.control.PasswordField; //
 import javafx.geometry.Insets;
 
 import javafx.stage.FileChooser; //For file explorer desktop
-/**
- * Hello world!
- */
+
 public class MariaDBApp extends Application {
     /**
-     *
-     * @param stage
-     * @throws Exception
+     * Class: MariaDBApp is the GUI application that runs in a graphic
+     * environment for users to access the database. This allows less
+     * technically advanced users to access and update their databases.
      */
     private MariaResearchLogin login;
     private Scene loginScene;
@@ -69,26 +67,15 @@ public class MariaDBApp extends Application {
         //INTERACTION AREA
         loginScene = new Scene(createLoginDisplay(stage), 400, 200);
         mainScene = new Scene(createMainDisplay(stage,bounds.getWidth()/1.5, bounds.getHeight()/1.5), bounds.getWidth()/1.5, bounds.getHeight()/1.5);
-        /*
-        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        int width = gd.getDisplayMode().getWidth();
-        int height = gd.getDisplayMode().getHeight();
-        // Create a scene and set it on the stage
 
-        //Scene scene = new Scene(loginLabel, width, height);  // 400x200 is the window size*/
-        //Scene scene = new Scene(loginLabel, width, height);
         stage.setScene(loginScene);
-
-        // Set the window title
+        stage.setResizable(false);
         stage.setTitle("MariaDB management system (Login)");
-        // Show the stage (window)
-        //stage.setResizable(false);
         stage.show();
     }
     public Pane createMainDisplay(Stage stage, double width, double height) {
         //MAIN APPLICATION
         AnchorPane mainDisplay = new AnchorPane();
-        //
         GridPane toolbar = new GridPane();
         toolbar.setHgap(10);
         toolbar.setVgap(10);
@@ -96,8 +83,6 @@ public class MariaDBApp extends Application {
         toolbar.setBackground(Background.fill(Color.LIGHTBLUE));;
         //toolbar.setPrefHeight(40);
         toolbar.setPrefWidth(width);
-        //
-
         //SCREEN LAYOUT
         GridPane screenUI = new GridPane();
         //console
@@ -154,7 +139,7 @@ public class MariaDBApp extends Application {
                 System.out.println("Selected file: " + selectedFile.getAbsolutePath());
                 fileField.setText(selectedFile.getAbsolutePath());
                 // You can now read/process the file
-                String res = login.sqlParser(selectedFile);
+                String res = login.processSQL(selectedFile);
                 console.setText(res);
             }
             else {
@@ -172,7 +157,20 @@ public class MariaDBApp extends Application {
                 log.setText("No content in console.");
             }
             else{
-                login.injectSQL(console.getText());
+                ResultSet resultSet = login.injectSQL(console.getText());
+                if (resultSet != null) {
+                    try {
+                        String result = "Query returned " + resultSet.getFetchSize();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        e.getSQLState();
+                        System.out.println(e);
+                    }
+                    output.setText(resultSet.toString());
+                }
+                else {
+                    output.setText("error");
+                }
             }
         });
         GridPane.setConstraints(injectButton, 2, 0);
@@ -200,6 +198,13 @@ public class MariaDBApp extends Application {
 
         return mainDisplay;
     }
+
+    /**
+     * createLoginDisplay() creates the window for user login, and establishes
+     * connection to the database specified.
+     * @param stage
+     * @return
+     */
     public Pane createLoginDisplay(Stage stage)
     {
         AnchorPane section1 = new AnchorPane();
@@ -251,20 +256,24 @@ public class MariaDBApp extends Application {
         AnchorPane.setRightAnchor(passwordField, 125.0);
         AnchorPane.setTopAnchor(passwordField, 100.0);
         section1.getChildren().add(passwordField);
-
+        //LOGIN BUTTON
         Button submit = new Button("Login");
         AnchorPane.setRightAnchor(submit, 20.0);
         AnchorPane.setTopAnchor(submit, 70.0);
         submit.setFont(new Font("Courier New", 16));
         submit.setPrefHeight(55);
         submit.setPrefWidth(80);
+        /*
+        The function of this button allows users to login, and then redirects to
+        the application's main window.
+         */
         submit.setOnAction(event -> {
             System.out.println("📣 Submit button clicked");
             String dbUrl = urlField.getText();
             String user = userField.getText();
             Platform.runLater(() -> {
                 try {
-                    MariaResearchLogin session = new MariaResearchLogin(dbUrl, 1, user, passwordField.getText().toCharArray());
+                    MariaResearchLogin session = new MariaResearchLogin(dbUrl, user, passwordField.getText().toCharArray());
                     login = session;
                     System.out.println("Login successful");
                     userField.clear();

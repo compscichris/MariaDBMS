@@ -57,6 +57,16 @@
       <artifactId>mariadb-java-client</artifactId>
       <version>3.5.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.testfx</groupId>
+      <artifactId>testfx-core</artifactId>
+      <version>4.0.18</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testfx</groupId>
+      <artifactId>testfx-junit5</artifactId>
+      <version>4.0.18</version>
+    </dependency>
   </dependencies>
 
   <build>

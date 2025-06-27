@@ -1,22 +1,27 @@
 package View;
 
 import Controller.MariaResearchLogin;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+/**
+ * MariaDBConsole is the console variant of the application that can run on machines without GUI, and
+ * can be used for testing and automation purposes.
+ *
+ */
 public class MariaDBConsole {
-    /*
-     * selectOption is a method that handles the user interface from the console side
-     */
-    MariaResearchLogin session;
+    private MariaResearchLogin session;
     public MariaDBConsole() {
         Scanner getURL = new Scanner(System.in);
         String mariaURL = getURL.next();
-        this.session = new MariaResearchLogin(mariaURL, 0, "", new char[1]);
+        this.session = new MariaResearchLogin(mariaURL);
         this.selectOption();
     }
+
+    /**
+     * selectOption() is
+     */
     public void selectOption()
     {
         Scanner input = new Scanner(System.in);
@@ -25,7 +30,7 @@ public class MariaDBConsole {
         while(option != "quit")
         {
             System.out.println("OPTIONS (Enter option '*' ");
-            System.out.println("Option A: INPUT SQL QUERY");//WILL BE THE MOST COMPLEX
+            System.out.println("Option A: INJECT SQL QUERY");//WILL BE THE MOST COMPLEX
             System.out.println("Option B: INJECT SQL FILE");
             System.out.println("Option C: RETRIEVE SQL TABLES");
             System.out.println("EXIT: Enter 'quit'");

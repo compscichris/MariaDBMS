@@ -1,7 +1,6 @@
 /**
- /**TODO: VERIFY COMPLETION OF FILE, TEST FOR ERRORS, FINISH DOCUMENTATION
- * Filename: Prog4.java
- * Authors: Chris Chen
+ * Program: MariaResearchLogin
+ * Author: compscichris
  */
 
 
@@ -14,46 +13,55 @@ import View.MariaDBConsole;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+/**
+ * MariaResearch is the main class that initiates the running of the
+ * application, and has the feature of being able to run different variants
+ * of the application for different use cases
+ */
 public class MariaResearch
 {
-    public static int instance = 0;
-    public static final String tName[] = {"PCparts", "CPUspec", "MOBOspec", "GPUspec", "flight_staff"};
-    /**
-     * This main method handles all the code that is needed to create the connection to the oracle dbms.
-     * It creates the tables for us by reading the csv files table data.
-     *
-     */
     public static void main (String [] args)
     {
-        String mariaURL="";
         int mode = -1;
         char password[];
-        //default run configuration
+        //NO ARG
         if(args.length == 0) {
             mode = 0;
         }
-        //single arg run configuration
+        //SINGLE ARG
         else if(args.length == 1)
         {
             mode = Integer.parseInt(args[0]);
+            MariaResearch mariaResearch = new MariaResearch(mode);
         }
         else {
-            System.out.println("\nIncorrect Format Detected\n Expected Format:  java MariaLogin <MariaDB URL> <mode (optional)> ");
+            System.out.println("\nIncorrect Format Detected\n Expected Format: java MariaResearch <mode>");
             System.exit(-1);
         }
+    }
+
+    /**
+     * Object of MariaResearch is used to streamline and allow modularity
+     * of application for testing
+     * @param mode: int value to select operation mode of MariaResearch.
+     */
+    public MariaResearch(int mode)
+    {
+        if(mode == 0) {
+            //Not implemented feature
+        }
         //console or application gui mode
-        if(mode == 0)
+        else if(mode == 1)
         {
             MariaDBConsole console = new MariaDBConsole();
         }
-        else if(mode == 1)
+        else if(mode == 2)
         {
             Application.launch(MariaDBApp.class);
         }
-    }
-    public MariaResearch(String mariaURL, int mode)
-    {
-        //Application;
-        //MariaResearchLogin session = new MariaResearchLogin(mariaURL, mode);
+        else {
+            System.out.println("\nIncorrect Format Detected\n Expected Format: java MariaResearch <mode>");
+            System.exit(-1);
+        }
     }
 }
