@@ -1,14 +1,19 @@
 package Controller;
 import java.sql.*;
 public class QueryResults {
-    ResultSet results;
-    Statement stmt;
-    public QueryResults(Statement stmt, ResultSet results) {
+    private ResultSet results;
+    private Statement stmt;
+    private String message;
+    public QueryResults(Statement stmt, ResultSet results, String message) {
         this.results = results;
         this.stmt = stmt;
+        this.message = message;
     }
     public ResultSet getResults() {
         return results;
+    }
+    public String getMessage() {
+        return message;
     }
     public void close() {
         try{

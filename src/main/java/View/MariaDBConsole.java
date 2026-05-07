@@ -55,7 +55,7 @@ public class MariaDBConsole {
                     user_in = input.nextLine();
                 }
                 try{
-                    session.injectSQL(aggregate);
+                    session.parseSQL(aggregate);
                 } catch (MariaLoginException e) {
                     System.err.println(e.getMessage());
                 }

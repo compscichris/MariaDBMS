@@ -4,6 +4,7 @@
  */
 package Controller;
 import com.sun.jna.WString;
+import com.sun.source.tree.BinaryTree;
 
 import java.io.*;
 import java.sql.*;
@@ -12,6 +13,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+
 /**
  * MariaResearchLogin is a class that encapsulates the connection to the MariaDB url provided, with
  * different modes of connection allowed to accommodate the different forms of application.
@@ -64,61 +67,18 @@ public class MariaResearchLogin
 			System.exit(-1);
 		}
 	}
-	/**
-	 * injectSQL() is a method that executes an SQL statement if possible, and returns the result of
-	 * the SQL query.
-	 * @return a ResultSet object that contains the response of a valid query.
-	 */
-	//THROW
-	public QueryResults injectSQL(String aggregate) throws MariaLoginException
-	{
-		try {
-			System.out.println("Executing statement...");
-			Statement stmt = conDB.createStatement();
-			ResultSet result = stmt.executeQuery(aggregate);
-			QueryResults queryResult = new QueryResults(stmt, result);
-			return queryResult;
-		}
-		catch (SQLException e)
-		{
-			System.err.println("\tMessage:   " + e.getMessage());
-			System.err.println("\tSQLState:  " + e.getSQLState());
-			System.err.println("\tErrorCode: " + e.getErrorCode());
-			throw new MariaLoginException(MariaLoginException.Error.SQL_SYNTAX_ERROR);
-		}
-	}
-	/**
-	 * parseResponse() is a method that parses the response from the server to a provided query.
-	 * @return 2D ArrayList of String storing the results.
-	 */
-	//THROW
-	public ArrayList<ArrayList<String>>parseResponse(ResultSet result){
-		try{
-			int columns = result.getMetaData().getColumnCount();
-			ArrayList<ArrayList<String>> response = new ArrayList<ArrayList<String>>();
-			while(result.next()){
-				ArrayList<String> row = new ArrayList<String>(columns);
-				for(int i = 0; i < columns; i++){
-					row.add(result.getObject(i+1).toString() != null ?
-							result.getObject(i+1).toString() : "null");
-				}
-				response.add(row);
-			}
-			return response;
-		} catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-	}
+	/* CLIENT SIDE PROCESSING */
+
 
 	/**
-	 * processSQL(File file) is a method that retrieves an SQL file, and converts the query into
+	 * processFile(File file) is a method that retrieves an SQL file, and converts the query into
 	 * string. As of current, no additional function except to read in the file query into a string,
 	 * and has no verification of the query syntax.
 	 * @param file
 	 * @return string representation of the query in the SQL file.
 	 */
 	//THROW
-	public String processSQL(File file){
+	public String processFile(File file){
 		String res = "";
 		if(!file.getName().endsWith(".sql")){
 			return res;
@@ -136,21 +96,55 @@ public class MariaResearchLogin
 		}
 		return res;
 	}
-	public String [] parseSQL(String rawSQL){
-		rawSQL = rawSQL.trim();
-		boolean error = false;
-		if(rawSQL.charAt(rawSQL.length()-1) != ';'){
-			error = true;
-		}
-		String [] res = rawSQL.split(";");
-		for(int i = 0; i < res.length-1; i++){
-			res[i] = res[i].trim() + ";";
-		}
-		res[res.length-1] = res[res.length-1].trim();
-		if(!error){
-			res[res.length-1] += ";";
-		}
-		return res;
+
+	/**
+	 *
+	 * parseSQL() handles the processing of raw SQL sent by the user
+	 * @param rawSQL
+	 * @return
+	 * @throws MariaLoginException
+	 */
+	public ArrayList<QueryResults> parseSQL(String rawSQL) throws MariaLoginException {
+		//SANITIZE SQL for atomic execution
+		String [] inputStmt = rawSQL.split(";");
+		Pattern allowedSqlPattern = Pattern.compile("(?i)^(SELECT|INSERT|UPDATE)\\s.*$");
+		ArrayList<QueryResults> queryResults = new ArrayList<>();
+        for (String s : inputStmt) {
+            //CASES
+            //1. Statement is not blank
+            //2. Statement is blank
+            if (!s.trim().isEmpty()) {
+                //check if the regex matches (ALLOW ONLY SELECT, INSERT, UPDATE)
+                if (allowedSqlPattern.matcher(s).matches()) {
+                    try {
+                        System.out.println("Executing statement...");
+                        Statement stmt = conDB.createStatement();
+                        String[] splitSQL = s.split("\\s+");
+                        ResultSet result = null;
+                        QueryResults queryResult = null;
+                        if (splitSQL[0].equalsIgnoreCase("select")) {
+                            result = stmt.executeQuery(s);
+                            queryResult = new QueryResults(stmt, result, "");
+                        } else if (splitSQL[0].equalsIgnoreCase("insert")) {
+                            int rows = stmt.executeUpdate(s);
+                            String message = "INSERTED " + rows + " rows.";
+                            queryResult = new QueryResults(stmt, null, message);
+                        } else if (splitSQL[0].equalsIgnoreCase("update")) {
+                            int rows = stmt.executeUpdate(s);
+                            String message = "DELETED " + rows + " rows.";
+                            queryResult = new QueryResults(stmt, null, message);
+                        }
+                        queryResults.add(queryResult);
+                    } catch (SQLException e) {
+                        System.err.println("\tMessage:   " + e.getMessage());
+                        System.err.println("\tSQLState:  " + e.getSQLState());
+                        System.err.println("\tErrorCode: " + e.getErrorCode());
+                        throw new MariaLoginException(MariaLoginException.Error.SQL_SYNTAX_ERROR);
+                    }
+                }
+            }
+        }
+		return queryResults;
 	}
 	/**
 	 * processCSV(File file) is a method that reads and parses CSV files, and then determines the best
@@ -197,6 +191,34 @@ public class MariaResearchLogin
 		}
 		return res;
 	}
+	/* SERVER RESPONSE */
+
+
+
+	/**
+	 * parseResponse() is a method that parses the response from the server to a provided query.
+	 * @return 2D ArrayList of String storing the results.
+	 */
+	//THROW
+	public ArrayList<ArrayList<String>>parseResponse(ResultSet result){
+		try{
+			int columns = result.getMetaData().getColumnCount();
+			ArrayList<ArrayList<String>> response = new ArrayList<ArrayList<String>>();
+			while(result.next()){
+				ArrayList<String> row = new ArrayList<String>(columns);
+				for(int i = 0; i < columns; i++){
+					row.add(result.getObject(i+1).toString() != null ?
+							result.getObject(i+1).toString() : "null");
+				}
+				response.add(row);
+			}
+			return response;
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+
 	/**
 	 * close() is a method that terminates the connection.
 	 */

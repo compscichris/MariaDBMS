@@ -4,5 +4,6 @@ View\MariaDBApp.class
 Controller\MariaLoginException$Error.class
 Controller\MariaResearchLogin.class
 module-info.class
+View\LoginView.class
 Controller\MariaLoginException.class
 Controller\MariaResearch.class

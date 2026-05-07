@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import Controller.MariaLoginException;
@@ -129,6 +130,8 @@ public class MariaDBApp extends Application {
             System.out.println("toolbarWidth: " + mainWidth);
             //AnchorPane.setLeftAnchor(loginLabel, (paneWidth - labelWidth) / 2.0);
         });
+
+        //FILE selection
         TextField fileField = new TextField();
         fileField.setFont(new Font("Courier New", 12));
         fileField.setEditable(false);
@@ -150,8 +153,7 @@ public class MariaDBApp extends Application {
             if (selectedFile != null) {
                 System.out.println("Selected file: " + selectedFile.getAbsolutePath());
                 fileField.setText(selectedFile.getAbsolutePath());
-                // You can now read/process the file
-                String res = login.processSQL(selectedFile);
+                String res = login.processFile(selectedFile);
                 console.setText(res);
             }
             else {
@@ -171,30 +173,37 @@ public class MariaDBApp extends Application {
             }
             else{
                 try{
-                    String [] queryList = login.parseSQL(console.getText());
-                    for(String query : queryList){
-                        QueryResults queryResult = login.injectSQL(query);
-                        if (queryResult != null) {
-                            String result = "Query returned ";
-                            try {
-                                int rows = 0;
-                                while(queryResult.getResults().next())
-                                {
-                                    rows++;
-                                    System.out.println(queryResult.getResults().getString(1));
+                    ArrayList<QueryResults> queryList = login.parseSQL(console.getText());
+                    for(QueryResults query : queryList){
+                        if (query != null) {
+                            String result = "";
+                            if(query.getResults() != null)
+                            {
+                                try {
+                                    int rows = 0;
+                                    while(query.getResults().next())
+                                    {
+                                        rows++;
+                                        System.out.println(query.getResults().getString(1));
+                                    }
+                                    result += rows;
+
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                    e.getSQLState();
+                                    System.out.println(e);
                                 }
-                                result += rows;
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                                e.getSQLState();
-                                System.out.println(e);
+                                output.setText(result);
                             }
-                            output.setText(result);
+                            else{
+                                output.setText(query.getMessage());
+                            }
+                            query.close();
                         }
-                        else {
-                            output.setText("error");
+                        else{
+                            output.setText("ERROR: QUERY syntax error.");
                         }
-                        queryResult.close();
+
                     }
                 } catch (MariaLoginException e) {
                     //PRINT SQL ERROR TO CONSOLE
